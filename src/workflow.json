@@ -1,0 +1,1750 @@
+{
+  "name": "Gemini Google credentials",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "gemini-generate",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2880,
+        -720
+      ],
+      "id": "0896eaa4-6601-4884-835a-2e764450972a",
+      "name": "Webhook",
+      "webhookId": "5a3c6d2c-596f-49fa-841d-9eb93c65d071"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"error\": \"{{$json.error}}\"\n}\n",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -1760,
+        -1008
+      ],
+      "id": "d1cf1823-b69b-473e-a439-8474fee16471",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d9f2a96d-e090-4b20-89bc-3ca41b8202c6",
+              "leftValue": "={{ $json.body.developer_api_key }}",
+              "rightValue": "image",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "cb8c7fef-19a6-40dd-91f2-fa79e8e420fc",
+              "leftValue": "={{ $json.body.type }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "dff439d9-3058-48c8-a95c-7d8d3982f426",
+              "leftValue": "={{ $json.body.prompt }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2656,
+        -720
+      ],
+      "id": "2e165e43-5c2e-4512-9dd6-d19b53220b67",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8",
+          "mode": "list",
+          "cachedResultName": "Gemini credentials tab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Developers tab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2432,
+        -816
+      ],
+      "id": "0b67d54a-8579-432b-8017-038a860de1a5",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "htKMG5aGfgmBdCON",
+          "name": "Google Sheets account 4"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const incomingKey = $('Webhook').first().json.body.developer_api_key;\n\nconst developers = items.map(i => i.json);\n\nconst dev = developers.find(\n  d => d.developer_api_key === incomingKey\n);\n\nif (!dev) {\n  return [\n    {\n      json: {\n        error: \"Wrong developer_api_key\"\n      }\n    }\n  ];\n}\n\nif (dev.status !== \"active\") {\n  return [\n    {\n      json: {\n        error: \"Developer access disabled\"\n      }\n    }\n  ];\n}\n\nreturn [\n  {\n    json: {\n      developer_name: dev.developer_name,\n      developer_api_key: dev.developer_api_key,\n      prompt: $('Webhook').first().json.body.prompt,\n      type: $('Webhook').first().json.body.type,\n      reference_image_url: $('Webhook').first().json.body.reference_image_url || null,\n      image_count: $('Webhook').first().json.body.image_count || null,\n      video_duration: $('Webhook').first().json.body.video_duration || null,\n      model: $('Webhook').first().json.body.model      \n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2208,
+        -912
+      ],
+      "id": "774caf73-8e81-4482-9112-e499df4a9cf2",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.error }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "fa34cf2d-8175-43e2-b0d4-4e431dbd3d16"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "1a9abe22-f6b3-4502-975b-569923866662",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -1984,
+        -912
+      ],
+      "id": "4825f7c7-1c8d-428e-bee4-e3d0a3eaa894",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nif (items.length === 0) {\n  throw new Error('No rows found');\n}\n\nconst randomIndex = Math.floor(Math.random() * items.length);\n\nreturn [items[randomIndex]];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1536,
+        -816
+      ],
+      "id": "6334ca3e-98b6-471a-ba53-1d806443ba02",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Code in JavaScript').item.json.type }}",
+                    "rightValue": "image",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "4815f848-246e-4d0d-aa0b-293a213632f4"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "4e2ae814-b62a-4a26-87a7-e2337fed29bf",
+                    "leftValue": "={{ $('Code in JavaScript').item.json.type }}",
+                    "rightValue": "video",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -1088,
+        -816
+      ],
+      "id": "cb42555b-0c9e-4607-8e3c-867fe5511725",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1726a6b5-f0c9-4fce-a686-6d806b77d117",
+              "leftValue": "={{ $json.reference_image_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "bd5a788c-2833-4234-a8f8-f0c2bebaa63e",
+              "leftValue": "={{ $json.reference_image_url }}",
+              "rightValue": "=null",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -864,
+        -912
+      ],
+      "id": "5610fbd2-707b-4519-a75f-f090944cbe9e",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.reference_image_url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -640,
+        -1008
+      ],
+      "id": "290ff39e-62a6-48f8-be92-c03bd25c4394",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "credentialsId": "={{ $('Code in JavaScript1').item.json.credential_id }}",
+        "nodeJson": "={\n  \"nodes\": [\n    {\n      \"parameters\": {\n        \"resource\": \"image\",\n        \"modelId\": {\n          \"__rl\": true,\n          \"value\": \"models/{{ $('Code in JavaScript').item.json.model }}\",\n          \"mode\": \"list\",\n          \"cachedResultName\": \"models/{{ $('Code in JavaScript').item.json.model }}\"\n        },\n        \"prompt\": \"{{ $('Code in JavaScript').item.json.prompt }}\",\n        \"options\": {}\n      },\n      \"type\": \"@n8n/n8n-nodes-langchain.googleGemini\",\n      \"typeVersion\": 1,\n      \"position\": [\n        1776,\n        400\n      ],\n      \"id\": \"8a3f059b-5114-466f-89d8-b176b80d3003\",\n      \"name\": \"Generate an image\",\n      \"credentials\": {\n        \"googlePalmApi\": {\n          \"id\": \"DFeQEbJbi8PF6Yys\",\n          \"name\": \"Google Gemini(PaLM) Api account 3\"\n        }\n      }\n    }\n  ],\n  \"connections\": {},\n  \"pinData\": {},\n  \"meta\": {\n    \"templateCredsSetupCompleted\": true,\n    \"instanceId\": \"481e5b29cbc69c94569219d90b5b7bffb59e78609d7cf76f6812062abe38fbe7\"\n  }\n}"
+      },
+      "type": "n8n-nodes-run-node-with-credentials-x.runNodeWithCredentialsX",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        -816
+      ],
+      "id": "4b22e0b8-6c89-450c-be0c-2cf216c3568b",
+      "name": "Run Node With Credentials X"
+    },
+    {
+      "parameters": {
+        "credentialsId": "={{ $('Code in JavaScript1').item.json.credential_id }}",
+        "nodeJson": "={\n  \"nodes\": [\n    {\n      \"parameters\": {\n        \"resource\": \"video\",\n        \"modelId\": {\n          \"__rl\": true,\n          \"value\": \"models/veo-3.0-fast-generate-001\",\n          \"mode\": \"list\",\n          \"cachedResultName\": \"models/veo-3.0-fast-generate-001\"\n        },\n        \"prompt\": \"={{ $('Code in JavaScript').item.json.prompt }}\",\n        \"options\": {}\n      },\n      \"type\": \"@n8n/n8n-nodes-langchain.googleGemini\",\n      \"typeVersion\": 1.1,\n      \"position\": [\n        832,\n        576\n      ],\n      \"id\": \"b3c972f3-8a1b-49ff-a50b-9adf3af88208\",\n      \"name\": \"Generate a video\",\n      \"credentials\": {\n        \"googlePalmApi\": {\n          \"id\": \"DFeQEbJbi8PF6Yys\",\n          \"name\": \"Google Gemini(PaLM) Api account 3\"\n        }\n      }\n    }\n  ],\n  \"connections\": {},\n  \"pinData\": {},\n  \"meta\": {\n    \"templateCredsSetupCompleted\": true,\n    \"instanceId\": \"481e5b29cbc69c94569219d90b5b7bffb59e78609d7cf76f6812062abe38fbe7\"\n  }\n} "
+      },
+      "type": "n8n-nodes-run-node-with-credentials-x.runNodeWithCredentialsX",
+      "typeVersion": 1,
+      "position": [
+        -864,
+        -576
+      ],
+      "id": "46ccb69b-6b6a-4125-9576-12034e7d8956",
+      "name": "Run Node With Credentials X1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-6",
+              "name": "bunnycdn_api_key",
+              "value": "4ef48caf-3b9a-492a-6ffe-9961ead7522d2ac3f9b5-1d1c-5511-80ca-29788315287b",
+              "type": "string"
+            },
+            {
+              "id": "id-7",
+              "name": "bunnycdn_storage_zone",
+              "value": "ancapex-final-video",
+              "type": "string"
+            },
+            {
+              "id": "id-8",
+              "name": "bunnycdn_hostname",
+              "value": "storage.bunnycdn.com",
+              "type": "string"
+            },
+            {
+              "id": "id-9",
+              "name": "bunnycdn_password",
+              "value": "90d00776-66af-4b27-bc8c2550ad7f-6a90-4434",
+              "type": "string"
+            },
+            {
+              "id": "id-10",
+              "name": "bunnycdn_cdn_hostname",
+              "value": "ancapex-final-video.b-cdn.netMain",
+              "type": "string"
+            },
+            {
+              "id": "bd4bf71a-1620-4098-aa1a-565cf837abbf",
+              "name": "gemini-video-folder",
+              "value": "gemini-videos",
+              "type": "string"
+            },
+            {
+              "id": "6d3c4c16-08b0-4dd6-a79c-a09a375e3b41",
+              "name": "final-video-cdn-b",
+              "value": "https://finalvideo.b-cdn.net/",
+              "type": "string"
+            },
+            {
+              "id": "cff98edd-f69f-4802-8b1a-77c884ed654f",
+              "name": "gemini-images",
+              "value": "gemini-images",
+              "type": "string"
+            },
+            {
+              "id": "a3af0132-528d-47a5-a5f8-6a4a40b10517",
+              "name": "gemini-videos",
+              "value": "gemini-videos",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "702925d1-e66d-4de4-998a-0ffe29cefa4c",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1312,
+        -816
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://{{ $('Workflow Configuration').first().json.bunnycdn_hostname }}/{{ $('Workflow Configuration').first().json.bunnycdn_storage_zone }}/{{ $('Workflow Configuration').item.json['gemini-images'] }}/{{ $json.title }}.png",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "AccessKey",
+              "value": "=17dbdd61-c968-46f7-9d21d86f58ab-0dcd-42ee"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "id": "64687bd5-48fc-462a-b7ea-7663f487e688",
+      "name": "Upload Image to BunnyCDN",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        32,
+        -816
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const path = $input.first().json.id;\n\nconst title = path.match(/binary_data\\/([^/.]+)/)?.[1] || null;\n\nreturn [\n  {\n    json: {\n      title\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -416,
+        -896
+      ],
+      "id": "81663b0b-dc36-4d16-9ab8-1fc5713f8d07",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -192,
+        -816
+      ],
+      "id": "fbf83aac-15a3-4984-8258-5fde8f516d26",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"image_url\": \"{{ $('Workflow Configuration').item.json['final-video-cdn-b'] }}{{ $('Workflow Configuration').item.json['gemini-images'] }}/{{ $('Merge1').item.json.title }}.png\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1152,
+        -816
+      ],
+      "id": "b30c6645-0f02-4202-ad84-cd8b5ce7c125",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8",
+          "mode": "list",
+          "cachedResultName": "Gemini credentials tab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1469448639,
+          "mode": "list",
+          "cachedResultName": "Gemini Credentials Tab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8/edit#gid=1469448639"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "credential_id": "={{ $('If1').item.json.credential_id }}",
+            "last_used_at": "={{ $now.format('yyyy-MM-dd HH:MM') }}",
+            "usage_count": "={{ $json.usage_count + 1 }}"
+          },
+          "matchingColumns": [
+            "credential_id"
+          ],
+          "schema": [
+            {
+              "id": "credential_id",
+              "displayName": "credential_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "credential_type ",
+              "displayName": "credential_type ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "last_used_at",
+              "displayName": "last_used_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "usage_count",
+              "displayName": "usage_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "daily_limit (optional)",
+              "displayName": "daily_limit (optional)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        480,
+        -816
+      ],
+      "id": "316645c6-8c50-4608-99bd-f3ac209aaa5c",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "htKMG5aGfgmBdCON",
+          "name": "Google Sheets account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8",
+          "mode": "list",
+          "cachedResultName": "Gemini credentials tab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1469448639,
+          "mode": "list",
+          "cachedResultName": "Gemini Credentials Tab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8/edit#gid=1469448639"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "credential_id",
+              "lookupValue": "={{ $('If1').item.json.credential_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        256,
+        -816
+      ],
+      "id": "1b91641c-1563-40d6-ad70-3a743ddecc1b",
+      "name": "Get row(s) in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "htKMG5aGfgmBdCON",
+          "name": "Google Sheets account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8",
+          "mode": "list",
+          "cachedResultName": "Gemini credentials tab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1559452658,
+          "mode": "list",
+          "cachedResultName": "Available models",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8/edit#gid=1559452658"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "models",
+              "lookupValue": "={{ $('Code in JavaScript').item.json.model }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        704,
+        -816
+      ],
+      "id": "883a403f-4fe9-47b1-82e4-51a49721f075",
+      "name": "Get row(s) in sheet3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "htKMG5aGfgmBdCON",
+          "name": "Google Sheets account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8",
+          "mode": "list",
+          "cachedResultName": "Gemini credentials tab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1027937715,
+          "mode": "list",
+          "cachedResultName": "Logs tab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8/edit#gid=1027937715"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "developer_name": "={{ $('Code in JavaScript').item.json.developer_name }}",
+            "developer_api_key": "={{ $('Code in JavaScript').item.json.developer_api_key }}",
+            "generation_type": "={{ $('Code in JavaScript').item.json.type }}",
+            "images_generated": "1",
+            "credential_id_used": "={{ $('Code in JavaScript1').item.json.credential_id }}",
+            "status(success/error)": "Success",
+            "timestamp": "={{ $now.format('yyyy-MM-dd HH:MM') }}",
+            "model_used": "={{ $('Code in JavaScript').item.json.model }}",
+            "estimated_cost": "={{ $json.Prices }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "developer_name",
+              "displayName": "developer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "developer_api_key",
+              "displayName": "developer_api_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "generation_type",
+              "displayName": "generation_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "model_used",
+              "displayName": "model_used",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "images_generated",
+              "displayName": "images_generated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "videos_generated",
+              "displayName": "videos_generated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "credential_id_used",
+              "displayName": "credential_id_used",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estimated_cost",
+              "displayName": "estimated_cost",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status(success/error)",
+              "displayName": "status(success/error)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "error_message",
+              "displayName": "error_message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        928,
+        -816
+      ],
+      "id": "247c50a0-04a4-4ffa-8b2a-c8cb15f9f415",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "htKMG5aGfgmBdCON",
+          "name": "Google Sheets account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const path = $input.first().json.id;\n\n// Extract the title from the path\nconst title = path.match(/binary_data\\/([^/.]+)/)?.[1] || null;\n\nreturn [\n  {\n    json: {\n      title\n    },\n    binary: $input.first().binary  // <-- this keeps the binary file intact\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -416,
+        -576
+      ],
+      "id": "a8dd85b3-b4f6-4b49-a1eb-c83e36809f83",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8",
+          "mode": "list",
+          "cachedResultName": "Gemini credentials tab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1469448639,
+          "mode": "list",
+          "cachedResultName": "Gemini Credentials Tab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8/edit#gid=1469448639"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "active"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1760,
+        -816
+      ],
+      "id": "a78102f6-229e-4e69-8033-7c6a792f03af",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "htKMG5aGfgmBdCON",
+          "name": "Google Sheets account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"image_url\": \"{{ $('Workflow Configuration').item.json['final-video-cdn-b'] }}{{ $('Workflow Configuration').item.json['gemini-images'] }}/{{ $('Code in JavaScript3').item.json.title }}.mp4\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1152,
+        -576
+      ],
+      "id": "c2db06bd-8a5d-4cfa-8d4f-5e0931f5194a",
+      "name": "Respond to Webhook2"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8",
+          "mode": "list",
+          "cachedResultName": "Gemini credentials tab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1469448639,
+          "mode": "list",
+          "cachedResultName": "Gemini Credentials Tab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8/edit#gid=1469448639"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "credential_id": "={{ $('Switch1').item.json.credential_id }}",
+            "last_used_at": "={{ $now.format('yyyy-MM-dd HH:MM') }}",
+            "usage_count": "={{ $json.usage_count + 1 }}"
+          },
+          "matchingColumns": [
+            "credential_id"
+          ],
+          "schema": [
+            {
+              "id": "credential_id",
+              "displayName": "credential_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "credential_type ",
+              "displayName": "credential_type ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "last_used_at",
+              "displayName": "last_used_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "usage_count",
+              "displayName": "usage_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "daily_limit (optional)",
+              "displayName": "daily_limit (optional)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        256,
+        -576
+      ],
+      "id": "43e1b875-49dd-4627-bad1-558a2c100886",
+      "name": "Update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "htKMG5aGfgmBdCON",
+          "name": "Google Sheets account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8",
+          "mode": "list",
+          "cachedResultName": "Gemini credentials tab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1469448639,
+          "mode": "list",
+          "cachedResultName": "Gemini Credentials Tab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8/edit#gid=1469448639"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "credential_id",
+              "lookupValue": "={{ $('Switch1').item.json.credential_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        32,
+        -576
+      ],
+      "id": "b3b28ad2-af20-47a4-af48-37425ba0d647",
+      "name": "Get row(s) in sheet4",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "htKMG5aGfgmBdCON",
+          "name": "Google Sheets account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8",
+          "mode": "list",
+          "cachedResultName": "Gemini credentials tab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1559452658,
+          "mode": "list",
+          "cachedResultName": "Available models",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8/edit#gid=1559452658"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "models",
+              "lookupValue": "={{ $('Code in JavaScript').item.json.model }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        480,
+        -576
+      ],
+      "id": "d24be06a-f642-41b3-b4e1-3966425a550d",
+      "name": "Get row(s) in sheet5",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "htKMG5aGfgmBdCON",
+          "name": "Google Sheets account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8",
+          "mode": "list",
+          "cachedResultName": "Gemini credentials tab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1027937715,
+          "mode": "list",
+          "cachedResultName": "Logs tab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ysfrmIuhKcXeMHZ7mRuYKAfvt3VWHwdWAPfcpsrAQx8/edit#gid=1027937715"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "developer_name": "={{ $('Code in JavaScript').item.json.developer_name }}",
+            "developer_api_key": "={{ $('Code in JavaScript').item.json.developer_api_key }}",
+            "generation_type": "={{ $('Code in JavaScript').item.json.type }}",
+            "credential_id_used": "={{ $('Code in JavaScript1').item.json.credential_id }}",
+            "status(success/error)": "Success",
+            "timestamp": "={{ $now.format('yyyy-MM-dd HH:MM') }}",
+            "model_used": "={{ $('Code in JavaScript').item.json.model }}",
+            "estimated_cost": "=${{ $('Get row(s) in sheet5').item.json.Prices * $json.stdout }}",
+            "videos_generated": "1"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "developer_name",
+              "displayName": "developer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "developer_api_key",
+              "displayName": "developer_api_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "generation_type",
+              "displayName": "generation_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "model_used",
+              "displayName": "model_used",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "images_generated",
+              "displayName": "images_generated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "videos_generated",
+              "displayName": "videos_generated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "credential_id_used",
+              "displayName": "credential_id_used",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estimated_cost",
+              "displayName": "estimated_cost",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status(success/error)",
+              "displayName": "status(success/error)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "error_message",
+              "displayName": "error_message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        928,
+        -576
+      ],
+      "id": "04e99c25-d250-4da5-84de-df6b62f1ea99",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "htKMG5aGfgmBdCON",
+          "name": "Google Sheets account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://{{ $('Workflow Configuration').first().json.bunnycdn_hostname }}/{{ $('Workflow Configuration').first().json.bunnycdn_storage_zone }}/{{ $('Workflow Configuration').item.json['gemini-videos'] }}/{{ $json.title }}.mp4",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "AccessKey",
+              "value": "=17dbdd61-c968-46f7-9d21d86f58ab-0dcd-42ee"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "id": "c6ccf534-30f7-4317-bb04-8fa63205755c",
+      "name": "Upload Videos to BunnyCDN1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -192,
+        -576
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/videos/gemini_generated.mp4",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -640,
+        -576
+      ],
+      "id": "bbeb1b33-0e1a-4a4c-8eb5-bce9cf8895bc",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "command": "ffprobe -v error -show_entries format=duration -of csv=p=0 \"/videos/gemini_generated.mp4\" | awk '{\n  duration = $1\n  seconds = int(duration)%60\n  print seconds\n}'"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        704,
+        -576
+      ],
+      "id": "3c1b4737-4e2c-4e3a-8a5e-8015a7ec3a7a",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n\"error\": \"Invalid request: Please verify the fields you are sending\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -2432,
+        -624
+      ],
+      "id": "be674a73-1b1c-4c81-adb5-b654ba433bb9",
+      "name": "Respond to Webhook3"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"error\": \"{{ $json.error }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -2208,
+        -720
+      ],
+      "id": "3587be89-1f61-4a24-bb6b-755d6ea22f9f",
+      "name": "Respond to Webhook4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Run Node With Credentials X1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Run Node With Credentials X",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        []
+      ]
+    },
+    "Run Node With Credentials X1": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Node With Credentials X": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Upload Image to BunnyCDN",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Image to BunnyCDN": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook1": {
+      "main": [
+        []
+      ]
+    },
+    "Get row(s) in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet3": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Upload Videos to BunnyCDN1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook2": {
+      "main": [
+        []
+      ]
+    },
+    "Update row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet4": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet5": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Videos to BunnyCDN1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "saveDataErrorExecution": "all"
+  },
+  "versionId": "fb72c965-8241-496b-a51e-466ca3cc23e8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "481e5b29cbc69c94569219d90b5b7bffb59e78609d7cf76f6812062abe38fbe7"
+  },
+  "id": "yXg9Gg9qBLWKO0okqdAl9",
+  "tags": []
+}
